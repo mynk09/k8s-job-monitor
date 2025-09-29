@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-sidecar-config
+  namespace: default
+data:
+  otel-config.yaml: |
+    receivers:
+      # Scrape host/container metrics
+      hostmetrics:
+        collection_interval: 5s
+        scrapers:
+          cpu: {}
+          memory: {}
+          disk: {}
+          filesystem: {}
+          network: {}
+          process:
+            include:
+              match_type: regexp
+              names:
+                - "sh"        # Busybox shell
+                - "sleep"     # Sleep command
+                - "echo"      # Echo command
+                - "busybox"   # Main busybox process
+            exclude:
+              match_type: regexp  
+              names:
+                - "otelcol.*" # Exclude OpenTelemetry's own processes
+
+    exporters:
+      logging:
+        verbosity: detailed   # only use 'verbosity' (remove loglevel)
+
+    service:
+      pipelines:
+        metrics:
+          receivers: [hostmetrics]
+          exporters: [logging]
