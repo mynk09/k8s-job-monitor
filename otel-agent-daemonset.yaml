@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: otel-agent
+  namespace: default
+  labels:
+    app: otel-agent
+spec:
+  selector:
+    matchLabels:
+      name: otel-agent
+  template:
+    metadata:
+      labels:
+        name: otel-agent
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8888"
+        prometheus.io/path: "/metrics"
+    spec:
+      hostNetwork: true
+      hostPID: true
+      containers:
+        - name: otel-agent
+          image: otel/opentelemetry-collector-contrib:0.80.0
+          args:
+            - "--config=/etc/otel-config.yaml"
+            - "--feature-gates=telemetry.useOtelForInternalMetrics"
+          volumeMounts:
+            - name: otel-agent-config
+              mountPath: /etc/otel-config.yaml
+              subPath: otel-config.yaml
+            - name: proc
+              mountPath: /host/proc
+              readOnly: true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+            - name: rootfs
+              mountPath: /host/root
+              readOnly: true
+            - name: var-lib
+              mountPath: /var/lib
+              readOnly: true
+            - name: var-log
+              mountPath: /var/log
+              readOnly: true
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          env:
+            - name: HOST_PROC
+              value: /host/proc
+            - name: HOST_SYS
+              value: /host/sys
+            - name: HOST_ROOTFS
+              value: /host/root
+          ports:
+            - containerPort: 8888
+              name: metrics
+            - containerPort: 4317
+              name: otlp-grpc
+            - containerPort: 4318
+              name: otlp-http
+          securityContext:
+            privileged: true
+      volumes:
+        - name: otel-agent-config
+          configMap:
+            name: otel-agent-config
+            items:
+              - key: otel-config.yaml
+                path: otel-config.yaml
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
+        - name: rootfs
+          hostPath:
+            path: /
+        - name: var-lib
+          hostPath:
+            path: /var/lib
+        - name: var-log
+          hostPath:
+            path: /var/log
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists

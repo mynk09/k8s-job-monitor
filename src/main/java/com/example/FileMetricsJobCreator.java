@@ -121,66 +121,22 @@ public class FileMetricsJobCreator {
                     .image("busybox:latest")
                     .command(Arrays.asList("sh", "-c"))
                     .args(Arrays.asList(
-                            "echo '🚀 Starting Busybox workload with FILE-BASED metrics'; " +
-                                    "METRICS_FILE=/tmp/metrics.prom; " +
-                                    "START_TIME=$(date +%s); " +
-
-                                    "# Initialize metrics file with Prometheus format" +
-                                    "echo '# TYPE workload_start_time gauge' > $METRICS_FILE; " +
-                                    "echo \"workload_start_time $(date +%s)\" >> $METRICS_FILE; " +
-                                    "echo '# TYPE workload_progress gauge' >> $METRICS_FILE; " +
-                                    "echo '# TYPE items_processed counter' >> $METRICS_FILE; " +
-                                    "echo '# TYPE workload_errors counter' >> $METRICS_FILE; " +
-                                    "echo '# TYPE workload_duration gauge' >> $METRICS_FILE; " +
-                                    "echo '# TYPE workload_status gauge' >> $METRICS_FILE; " +
-
-                                    "# Workload with progress tracking" +
+                            "echo 'Starting Busybox metrics workload'; " +
                                     "counter=0; " +
-                                    "error_count=0; " +
-                                    "total_items=0; " +
-                                    "while [ $counter -lt 6 ]; do " +
-                                    "  echo '🔄 Processing iteration: ' $counter; " +
-                                    "  " +
-                                    "  # Simulate processing items" +
-                                    "  items_this_iteration=$(( (RANDOM % 5) + 1 )); " +
-                                    "  total_items=$((total_items + items_this_iteration)); " +
-                                    "  " +
-                                    "  # Write progress metrics" +
-                                    "  echo \"workload_progress $counter\" >> $METRICS_FILE; " +
-                                    "  echo \"items_processed $total_items\" >> $METRICS_FILE; " +
-                                    "  " +
-                                    "  # Simulate occasional errors" +
-                                    "  if [ $((RANDOM % 4)) -eq 0 ]; then " +
-                                    "    echo '⚠️  Simulating error...'; " +
-                                    "    error_count=$((error_count + 1)); " +
-                                    "    echo \"workload_errors $error_count\" >> $METRICS_FILE; " +
-                                    "  fi; " +
-                                    "  " +
-                                    "  sleep 4; " +
+                                    "while [ $counter -lt 5 ]; do " +
+                                    "  echo '=== METRICS ==='; " +
+                                    "  echo 'workload_progress ' $counter; " +
+                                    "  echo 'items_processed_total ' $((counter * 10)); " +
+                                    "  echo 'errors_encountered_total ' $((counter / 2)); " +
+                                    "  sleep 2; " +
                                     "  counter=$((counter + 1)); " +
                                     "done; " +
-
-                                    "# Write final metrics" +
-                                    "END_TIME=$(date +%s); " +
-                                    "DURATION=$((END_TIME - START_TIME)); " +
-                                    "echo \"workload_duration $DURATION\" >> $METRICS_FILE; " +
-                                    "echo \"workload_status 1\" >> $METRICS_FILE; " +
-                                    "echo \"# Final metrics summary:\"; " +
-                                    "echo \"# - Iterations: $counter\"; " +
-                                    "echo \"# - Total items: $total_items\"; " +
-                                    "echo \"# - Errors: $error_count\"; " +
-                                    "echo \"# - Duration: ${DURATION}s\"; " +
-                                    "cat $METRICS_FILE; " +
-                                    "echo '✅ Workload completed - file metrics ready for collection'; " +
+                                    "echo '=== FINAL METRICS ==='; " +
+                                    "echo 'workload_progress ' $counter; " +
+                                    "echo 'workload_duration_seconds 10'; " +
+                                    "echo 'workload_status 1'; " +
+                                    "echo 'Workload completed'; " +
                                     "exit 0"
-                    ))
-                    .resources(new V1ResourceRequirements()
-                            .requests(Map.of("cpu", new Quantity("100m"), "memory", new Quantity("64Mi")))
-                            .limits(Map.of("cpu", new Quantity("200m"), "memory", new Quantity("128Mi"))))
-                    .volumeMounts(Arrays.asList(
-                            new V1VolumeMount()
-                                    .name("metrics-volume")
-                                    .mountPath("/tmp")
                     ));
 
             // EmptyDir volume for metrics files
