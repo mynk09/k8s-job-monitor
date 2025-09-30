@@ -121,21 +121,30 @@ public class FileMetricsJobCreator {
                     .image("busybox:latest")
                     .command(Arrays.asList("sh", "-c"))
                     .args(Arrays.asList(
-                            "echo 'Starting Busybox metrics workload'; " +
-                                    "counter=0; " +
-                                    "while [ $counter -lt 5 ]; do " +
-                                    "  echo '=== METRICS ==='; " +
-                                    "  echo 'workload_progress ' $counter; " +
-                                    "  echo 'items_processed_total ' $((counter * 10)); " +
-                                    "  echo 'errors_encountered_total ' $((counter / 2)); " +
+                            "echo 'Starting system metrics collection'; " +
+                                    "ITERATION=0; " +
+                                    "ERROR_COUNT=0; " +
+                                    "TOTAL_DISK_IO=0; " +
+                                    " " +
+                                    "while [ $ITERATION -lt 3 ]; do " +
+                                    "  echo '=== SYSTEM METRICS ==='; " +
+                                    "  echo \"process_cpu_time_seconds $((ITERATION + 1)).0$((RANDOM % 100))\"; " +
+                                    "  echo \"process_memory_usage_bytes $(( (RANDOM % 3000000000) + 50000000 ))\"; " +
+                                    "  echo \"process_memory_virtual_bytes $(( (RANDOM % 4000000000) + 100000000 ))\"; " +
+                                    "  echo \"process_disk_io_bytes_total $((TOTAL_DISK_IO + (RANDOM % 5000000) + 100000))\"; " +
+                                    "  echo \"workload_iterations_total $ITERATION\"; " +
+                                    "  echo \"workload_errors_total $ERROR_COUNT\"; " +
+                                    "  " +
                                     "  sleep 2; " +
-                                    "  counter=$((counter + 1)); " +
+                                    "  ITERATION=$((ITERATION + 1)); " +
+                                    "  TOTAL_DISK_IO=$((TOTAL_DISK_IO + (RANDOM % 5000000) + 100000)); " +
+                                    "  " +
+                                    "  if [ $((RANDOM % 4)) -eq 0 ]; then " +
+                                    "    ERROR_COUNT=$((ERROR_COUNT + 1)); " +
+                                    "  fi; " +
                                     "done; " +
-                                    "echo '=== FINAL METRICS ==='; " +
-                                    "echo 'workload_progress ' $counter; " +
-                                    "echo 'workload_duration_seconds 10'; " +
-                                    "echo 'workload_status 1'; " +
-                                    "echo 'Workload completed'; " +
+                                    " " +
+                                    "echo '✅ Metrics collection completed'; " +
                                     "exit 0"
                     ));
 
