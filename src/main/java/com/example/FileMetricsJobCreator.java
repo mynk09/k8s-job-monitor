@@ -24,7 +24,7 @@ public class FileMetricsJobCreator {
         this.batchApi = createKubernetesClient();
     }
 
-    private BatchV1Api createKubernetesClient() {
+    BatchV1Api createKubernetesClient() {
         try {
             ApiClient client = Config.defaultClient();
             Configuration.setDefaultApiClient(client);
