@@ -41,11 +41,21 @@ public class App {
             FileMetricsJobCreator fileMetricsCreator = new FileMetricsJobCreator();
             fileMetricsCreator.createJobWithFileMetrics();
 
+            // Wait a bit between patterns
+            Thread.sleep(5000);
+
+            // Option 3: Run Database Metrics Pattern (New)
+            System.out.println("\n3️⃣  Testing DATABASE METRICS Pattern...");
             System.out.println("=====================================================");
-            System.out.println("🎉 Both patterns completed successfully!");
+            DatabaseMetricsJobCreator dbMetricsCreator = new DatabaseMetricsJobCreator();
+            dbMetricsCreator.createDatabaseMetricsJob();
+
+            System.out.println("=====================================================");
+            System.out.println("🎉 All patterns completed successfully!");
             System.out.println("📊 Comparison:");
             System.out.println("   - Sidecar: Real-time process monitoring");
-            System.out.println("   - File-based: Application metrics + Agent scalability");
+            System.out.println("   - File-based: System metrics + Agent scalability");
+            System.out.println("   - Database: Application-level business metrics");
 
             span.setStatus(StatusCode.OK);
 
